@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>YunInspector</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://kit.fontawesome.com/a9e4066e85.js" crossorigin="anonymous" async defer></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrender/1.0.5/jsrender.min.js" async defer></script>
+    <style>
+        * {
+            font-family: 微軟正黑體;
+        }
+
+        body {
+            background-image: url('static/yuntech.jpg');
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- template -->
+    <script id="courseTemplate" type="text/x-jsrender">
+        <a href="course.html?course={{:courseID}}" class="list-group-item  list-group-item-action">
+            <div class="row">
+                <div class="col-md-3 pull-left align-self-center">
+                    <img class="list-group-item-text" style="width:64px"
+                        src="https://www.pinclipart.com/picdir/middle/22-221708_svg-png-icon-free-college-icon-black-white.png">
+                </div>
+                <div class="col-md-8">
+                    <div class="d-flex w-100 justify-content-between">
+                        {{!--
+                        {{if req === 1}}
+                        <h6 class="font-weight-bold"><span class="badge badge-danger">必修</span> {{:courseName}}</h6>
+                        {{else req == 2}}
+                        <h6 class="font-weight-bold"><span class="badge badge-warning">選修</span> {{:courseName}}</h6>
+                        {{else req == 3}}
+                        <h6 class="font-weight-bold"><span class="badge badge-success">通識</span> {{:courseName}}</h6>
+                        {{/if}}
+                        --}}
+                        <h6 class="font-weight-bold">
+                            {{if req === 1}}
+                            <span class="badge badge-danger">必修</span>
+                            {{else req == 2}}
+                            <span class="badge badge-warning">選修</span>
+                            {{else req == 3}}
+                            <span class="badge badge-success">通識</span>
+                            {{/if}}
+                        {{:courseName}}</h6>
+                        <small>評分 {{:avgRating}}</small>
+                    </div>
+                    <h6 class="text-muted font-weight-light">{{:college}}-{{:department}}</h6>
+                </div>
+            </div>
+        </a>
+    </script>
+    <script id="commentTemplate" type="text/x-jsrender">
+        <a href="course.html?course={{:courseID}}" class="list-group-item  list-group-item-action">
+            <div class="row">
+                <div class="col-md-3 pull-left align-self-center">
+                    <img class="list-group-item-text" style="width:64px"
+                        src="https://cdn1.iconfinder.com/data/icons/lemu-broadcasting/100/talk_bold_convert-512.png">
+                </div>
+                <div class="col-md-8">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="font-weight-bold my-0">
+                            {{if req === 1}}
+                            <span class="badge badge-danger">必修</span>
+                            {{else req == 2}}
+                            <span class="badge badge-warning">選修</span>
+                            {{else req == 3}}
+                            <span class="badge badge-success">通識</span>
+                            {{/if}}
+                        {{:courseName}}</h6>
+                        <small>評分 {{:rating}}</small>
+                    </div>
+                    <small class="text-muted">{{:college}}-{{:department}}</small>
+                    <p class="my-0" >{{:content}}</p>
+                    <div class="d-flex justify-content-end">
+                        <small class="text-muted">{{:postDate}}</small>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </script>
+    <!-- template -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark ">
+        <div class="d-md-flex d-block flex-row mx-md-auto mx-0">
+            <a class="navbar-brand" href="index.html">雲課大解析 YunInspector</a>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <form action="search.html" method="GET" class="form-inline my-2 my-lg-0">
+                    <input name="name" class="form-control mr-sm-2" type="search" placeholder="找課程" aria-label="Search">
+                    <button class="btn btn-outline-light my-2 my-sm-0">
+                        找課
+                        <i class="fa fa-search"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+        <button class="btn btn-outline-light pull-right" id="signinButton" onclick="signin()">
+            <i class="fab fa-google"></i> Sign in with Google
+        </button>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </nav>
+    <div class="container bg-transparent">
+        <div class="row d-flex justify-content-between p-4 ">
+            <a role="button" href="search.html?college=5" class="btn btn-success btn-lg m-1">未來學院</a>
+            <a role="button" href="search.html?college=3" class="btn btn-info btn-lg m-1">設計學院</a>
+            <a role="button" href="search.html?college=2" class="btn btn-warning btn-lg m-1">管理學院</a>
+            <a role="button" href="search.html?college=1" class="btn btn-danger btn-lg m-1">工程學院</a>
+            <a role="button" href="search.html?college=4" class="btn btn-primary btn-lg m-1">人文與科學學院</a>
+        </div>
+        <div class="row justify-content-between">
+            <div class="col-sm-6 col-px-2 py-1">
+                <div class="card bg-white">
+                    <div class="card-body">
+                        <h3 class="card-title">熱門課程</h3>
+                        <div id="courseList" class="list-group">
+                            <!-- template start -->
+                            <!-- template end -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-px-2 py-1">
+                <div class="card bg-white">
+                    <div class="card-body">
+                        <h3 class="card-title">最新評論</h3>
+                        <div id="commentList" class="list-group">
+                            <!-- template start -->
+                            <!-- template end -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const baseurl = 'http://127.0.0.1:5000';
+        fetch(baseurl + '/api/top/course', {
+            method: 'GET'
+        }).then(response => response.text())
+            .then(data => {
+                let parseed_data = JSON.parse(data);
+                let template = $.templates("#courseTemplate");
+                let html = template.render(parseed_data);
+                $("#courseList").html(html);
+            }).catch((error) => {
+                console.log('ERROR: ', error);
+            });
+
+        fetch(baseurl + '/api/top/comment', {
+            method: 'GET'
+        }).then(response => response.text())
+            .then(data => {
+                let parseed_data = JSON.parse(data);
+                console.log(data);
+                let template = $.templates("#commentTemplate");
+                let html = template.render(parseed_data);
+                $("#commentList").html(html);
+            }).catch((error) => {
+                console.log('ERROR: ', error);
+            })
+
+        if (localStorage.getItem('token') != null) {
+            document.getElementById("signinButton").innerText = '已登入';
+            document.getElementById("signinButton").onclick = signout;
+        }
+
+        function signin() {
+            gapi.auth2.authorize({
+                client_id: '',
+                scope: 'email profile openid',
+                response_type: 'id_token',
+                prompt: 'consent',
+                cookie_policy: 'none',
+                hosted_domain: 'gemail.yuntech.edu.tw'
+            }, function (response) {
+                if (response.error) {
+                    return;
+                }
+
+                fetch(baseurl + '/api/auth/authcallback', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        Code: response.id_token
+                    })
+                }).then(response => response.text())
+                    .then(token => {
+                        console.log(token);
+                        localStorage.setItem('token', token);
+                        document.getElementById("signinButton").innerText = '已登入';
+                        document.getElementById("signinButton").onclick = signout;
+                    }).catch((error) => {
+                        console.log('ERROR: ', error);
+                    });
+            });
+        }
+
+        function signout() {
+            localStorage.removeItem('token');
+            location.reload();
+        }
+    </script>
+    <script src="https://apis.google.com/js/client:platform.js" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" async defer></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" async defer></script>
+</body>
+
+</html>

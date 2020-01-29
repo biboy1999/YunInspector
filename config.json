@@ -1,0 +1,16 @@
+{
+    "SQL": {
+        "Server": "127.0.0.1,1433",
+        "User": "SA",
+        "Password": "SqlserverPassword",
+        "Database": "CIIP"
+    },
+    "OAuth": {
+        "ClientID": ""
+    },
+    "JWT": {
+        "secrets": "SECRETFORJWTTOKENPASSWORD",
+        "expireTime": 30,
+        "iss": "iss"
+    }
+}

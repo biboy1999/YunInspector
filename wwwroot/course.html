@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>YunInspector</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://kit.fontawesome.com/a9e4066e85.js" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrender/1.0.5/jsrender.min.js"></script>
+    <style>
+        * {
+            font-family: 微軟正黑體;
+        }
+
+        body {
+            background-image: url('static/yuntech.jpg');
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- template -->
+    <script id="commentTemplate" type="text/x-jsrender">
+        <li href="#" class="list-group-item  list-group-item-action">
+            <div class="row">
+                <div class="col-md-3 pull-left align-self-center">
+                    <img class="list-group-item-text" style="width:64px"
+                        src="https://cdn1.iconfinder.com/data/icons/lemu-broadcasting/100/talk_bold_convert-512.png">
+                </div>
+                <div class="col-md-8">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="font-weight-bold my-0">匿名</h6>
+                        <small>評分 {{:rating}}</small>
+                    </div>
+                    <p class="my-0" >{{:content}}</p>
+                    <div class="d-flex justify-content-end">
+                        <small class="text-muted">{{:postDate}}</small>
+                    </div>
+                </div>
+            </div>
+        </li>
+    </script>
+    <script id="courseInfoTemplate" type="text/x-jsrender">
+        <div class="row no-gutters justify-content-between">
+            <div class="col-sm-10">
+                <h5 class="font-weight-bold">
+                    {{if req === 1}}
+                    <span class="badge badge-danger">必修</span>
+                    {{else req == 2}}
+                    <span class="badge badge-warning">選修</span>
+                    {{else req == 3}}
+                    <span class="badge badge-success">通識</span>
+                    {{/if}}
+                {{:name}}</h5>
+            </div>
+            <div class="col-sm-2">
+                {{if avgRating == null}}
+                <small>評分 N/A</small>
+                {{else}}
+                <small>評分 {{:avgRating}}</small>
+                {{/if}}
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <h5 class="font-weight-bold">{{:departmnetName}}-{{:departmnetName}}</h5>
+        </div>
+        <div class="row">
+            <h6>教師:<span class="font-weight-bold"> {{:teacher}}</span></h6>
+        </div>
+        <div class="row d-flex w-100 justify-content-between">
+            <h6>開課班級:<span class="font-weight-bold"> {{:class}}</span></h6>
+            {{if classNo != ""}}
+            <h6>班別:{{:classNo}}</h6>
+            {{else}}
+            {{/if}}
+        </div>
+        <div class="row">
+            <h6>星期/節次/教室: {{:timetableClassroom}}</h6>
+        </div>
+        <div class="row">
+            <h6>學分組合: {{:credit}}</h6>
+        </div>
+        <h5 class="card-title">課程備註</h5>
+        <div class="card text-left">
+            <div class="card-body">
+                <h6>{{:detail}}</h6>
+            </div>
+        </div>
+    </script>
+    <!-- template -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark ">
+        <div class="d-md-flex d-block flex-row mx-md-auto mx-0">
+            <a class="navbar-brand" href="index.html">雲課大解析 YunInspector</a>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <form action="search.html" method="GET" class="form-inline my-2 my-lg-0">
+                    <input name="name" class="form-control mr-sm-2" type="search" placeholder="找課程" aria-label="Search">
+                    <button class="btn btn-outline-light my-2 my-sm-0">
+                        找課
+                        <i class="fa fa-search"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+        <button class="btn btn-outline-light pull-right" id="signinButton" onclick="signin()">
+            <i class="fab fa-google"></i> Sign in with Google
+        </button>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </nav>
+    <div class="container-fluid bg-transparent">
+
+        <div class="row pt-5 justify-content-center" id="alertdiv">
+        </div>
+
+        <div class="row pt-5 justify-content-center">
+            <div class="col-sm-4 mb-3 bg-transparent" id="left">
+                <div class="card text-center">
+                    <div class="card-header">
+                        <h4 class="font-weight-bold my-0">課程介紹</h4>
+                    </div>
+                    <div class="card-body" id="course-infocard">
+                        <!-- template start -->
+                        <!-- template end -->
+                    </div>
+                </div>
+                <div class="card text-center mt-3">
+                    <div class="card-header">
+                        <h4 class="font-weight-bold my-0">寫下評論</h4>
+                    </div>
+                    <div class="card-body">
+                        <form name="form" id="commentForm">
+                            <div class="form-group text-left">
+                                <label for="commentContent">評論</label>
+                                <textarea id="commentContent" class="form-control" name="commentContent"
+                                    aria-label="With textarea" rows="4"></textarea>
+                            </div>
+                            <div class="form-gorup row">
+                                <label for="ratingSel" class="col-sm-3 col-form-label">評分</label>
+                                <div class="col-sm-9">
+                                    <select class="form-control" name="rating" id="ratingSel">
+                                        <option value="0">0</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="7">7</option>
+                                        <option value="8">8</option>
+                                        <option value="9">9</option>
+                                        <option value="10">10</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row justify-content-center pt-2">
+                                <button class="btn btn-primary" type="button" onclick="submitComment()"
+                                    id="searchBtn">送出</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-5">
+                <div class="card">
+                    <div class="card-header text-center">
+                        <h4 class="font-weight-bold my-0">課程評論</h4>
+                    </div>
+                    <div class="card-body">
+                        <ul id="commentList" class="list-group">
+                            <!-- template start -->
+                            <!-- template end -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const baseurl = 'http://127.0.0.1:5000';
+        let params = (new URL(document.location)).searchParams;
+        $(document).ready(function () {
+            if (params.has('course')) {
+                courseID = params.get('course');
+                fetch(baseurl + '/api/course/' + courseID, {
+                    method: 'GET'
+                }).then(response => response.text())
+                    .then(data => {
+                        let parseed_data = JSON.parse(data);
+                        let template = $.templates("#courseInfoTemplate");
+                        let html = template.render(parseed_data);
+                        $("#course-infocard").html(html);
+                    }).catch((error) => {
+                        console.log('ERROR: ', error);
+                    });
+                fetch(baseurl + '/api/course/' + courseID + '/comment', {
+                    method: 'GET'
+                }).then(response => response.text())
+                    .then(data => {
+                        let parseed_data = JSON.parse(data);
+                        let template = $.templates("#commentTemplate");
+                        let html = template.render(parseed_data);
+                        $("#commentList").html(html);
+                    }).catch((error) => {
+                        console.log('ERROR: ', error);
+                    });
+            }
+        });
+
+        function submitComment() {
+            let formData = $('#commentForm').serializeArray().reduce((obj, field) => {
+                obj[field.name] = field.value;
+                return obj;
+            }, {});
+
+            fetch(baseurl + '/api/course/' + courseID + '/comment', {
+                method: 'POST',
+                body: JSON.stringify(formData),
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                    'content-type': 'application/json'
+                }
+            }).then(response => {
+                if (!response.ok) {
+                    showalert();
+                    throw new Error('POST fail');
+                }
+                return response.text();
+            }).then(data => {
+                console.log(data);
+                location.reload();
+            }).catch((error) => {
+                console.log('ERROR: ', error);
+            });
+
+            console.log(formData);
+        }
+
+        function signin() {
+            gapi.auth2.authorize({
+                client_id: '',
+                scope: 'email profile openid',
+                response_type: 'id_token',
+                prompt: 'consent',
+                cookie_policy: 'none',
+                hosted_domain: 'gemail.yuntech.edu.tw'
+            }, function (response) {
+                if (response.error) {
+                    return;
+                }
+
+                fetch(baseurl + '/api/auth/authcallback', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        Code: response.id_token
+                    })
+                }).then(response => response.text())
+                    .then(token => {
+                        console.log(token);
+                        localStorage.setItem('token', token);
+                        document.getElementById("signinButton").innerText = '已登入';
+                        document.getElementById("signinButton").onclick = signout;
+                    }).catch((error) => {
+                        console.log('ERROR: ', error);
+                    });
+            });
+        }
+
+        if (localStorage.getItem('token') != null) {
+            document.getElementById("signinButton").innerText = '已登入';
+            document.getElementById("signinButton").onclick = signout;
+        }
+
+        function signout() {
+            localStorage.removeItem('token');
+            location.reload();
+            // document.getElementById("signinButton").innerHTML = '<i class="fab fa-google"></i> Sign in with Google';
+            // document.getElementById("signinButton").onclick = signin;
+        }
+        function showalert() {
+            $('#alertdiv').append('<div class="col-sm-8 alert alert-danger alert-dismissible fade show text-center" role="alert"><strong> 請重新登入QQ。</strong><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+        }
+    </script>
+    <script src="https://apis.google.com/js/client:platform.js" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" async defer></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" async defer></script>
+</body>
+
+</html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>YunInspector</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://kit.fontawesome.com/a9e4066e85.js" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrender/1.0.5/jsrender.min.js"></script>
+    <style>
+        * {
+            font-family: 微軟正黑體;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-image: url('static/yuntech.jpg');
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: auto;
+        }
+
+        #toTop {
+            display: none;
+            position: fixed;
+            bottom: 20px;   
+            right: 30px;
+            height: 50px;
+            width: 50px;
+            z-index: 99;
+            border: none;
+            outline: none;
+            background-color: rgb(143, 255, 143);
+            color: white;
+            cursor: pointer;
+            padding: 15px;
+            border-radius: 50%;
+            font-size: 18px;
+        }
+
+        #toTop:hover {
+            background-color: #555;
+            /* Add a dark-grey background on hover */
+        }
+    </style>
+</head>
+
+<body>
+    <script id="courseTemplate" type="text/x-jsrender">
+        <a href="course.html?course={{:CourseId}}" class="list-group-item  list-group-item-action">
+            <div class="row">
+                <div class="col-md-1 pull-left align-self-center">
+                    <img class="list-group-item-text" style="width:64px"
+                        src="https://www.pinclipart.com/picdir/middle/22-221708_svg-png-icon-free-college-icon-black-white.png">
+                </div>
+                <div class="col-md-11">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="font-weight-bold">
+                            {{if Req === 1}}
+                            <span class="badge badge-danger">必修</span>
+                            {{else Req == 2}}
+                            <span class="badge badge-warning">選修</span>
+                            {{else Req == 3}}
+                            <span class="badge badge-success">通識</span>
+                            {{/if}}
+                        {{:CourseName}}</h6>
+                        {{if AvgRating == null}}
+                        <small>評分 N/A</small>
+                        {{else}}
+                            <small>評分 {{:AvgRating}}</small>
+                        {{/if}}
+                    </div>
+                    <h5>教師:{{:Teacher}}</h5>
+                    <h6 class="text-muted font-weight-light">{{:CollegeName}}-{{:DepartmentName}}</h6>
+                </div>
+            </div>
+        </a>
+    </script>
+    <button onclick="topFunction()" id="toTop" title="Go to top"><i class="fas fa-arrow-up"></i></button>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark ">
+        <div class="d-md-flex d-block flex-row mx-md-auto mx-0">
+            <a class="navbar-brand" href="index.html">雲課大解析 YunInspector</a>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <form action="search.html" method="GET" class="form-inline my-2 my-lg-0">
+                    <input name="name" class="form-control mr-sm-2" type="search" placeholder="找課程" aria-label="Search">
+                    <button class="btn btn-outline-light my-2 my-sm-0">
+                        找課
+                        <i class="fa fa-search"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+        <button class="btn btn-outline-light pull-right" id="signinButton" onclick="signin()">
+            <i class="fab fa-google"></i> Sign in with Google
+        </button>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </nav>
+    <div class="container pt-5 bg-transparent">
+        <div class="row">
+            <div class="col-sm">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm">
+                                <form id="searchForm" name="form">
+                                    <div class="form-row">
+                                        <div class="form-group col-sm-6">
+                                            <label for="CollegeSel">學院</label>
+                                            <select name="college" class="form-control" id="CollegeSel"
+                                                onchange="departmentChain()">
+                                                <option value="">全部</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group col-sm-6">
+                                            <label for="DepartmentSel">科系</label>
+                                            <select name="department" class="form-control" id="DepartmentSel">
+                                                <option value="">全部</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="TeacherInput" class="col-sm-1 col-form-label">教師</label>
+                                        <div class="col-sm-11">
+                                            <input name="teacher" type="search" class="form-control" id="TeacherInput"
+                                                placeholder="教師">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="CourseInput" class="col-sm-1 col-form-label">課程</label>
+                                        <div class="col-sm-11">
+                                            <input name="name" type="search" class="form-control" id="CourseInput"
+                                                placeholder="課程名稱">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="ReqSel" class="col-sm-1 col-form-label">類別</label>
+                                        <div class="col-sm-2">
+                                            <select name="req" class="form-control" id="ReqSel">
+                                                <option value="">全部</option>
+                                                <option value="1">必修</option>
+                                                <option value="2">選修</option>
+                                                <option value="3">通識</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-row justify-content-center">
+                                        <button class="btn btn-primary" type="button" onclick="search()"
+                                            id="searchBtn">查詢</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <hr />
+                        <h3>查詢結果</h3>
+                        <div class="row justify-content-center" id="pagination-top">
+                        </div>
+                        <div class="row py-3">
+                            <div class="col-sm">
+                                <div id="courseList" class="list-group">
+                                    <!-- template start -->
+                                    <!-- template end -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row justify-content-center" id="pagination-bottom">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const baseurl = 'http://127.0.0.1:5000';
+        let formelem = document.getElementById('searchForm');
+        let collegeDropDown = document.getElementById('CollegeSel');
+        let departmentDropDown = document.getElementById('DepartmentSel');
+        let departmetCollegeData;
+        let totopbtn = document.getElementById("toTop");
+        let total = 320;
+        fetch(baseurl + '/api/department', {
+            method: 'GET'
+        }).then(response => response.text())
+            .then(data => {
+                departmetCollegeData = JSON.parse(data);
+            }).catch((error) => {
+                console.log('ERROR: ', error);
+            });
+
+        function setPagination(num, count) {
+            let topClone = document.getElementById('pagination-top').cloneNode();
+            let botClone = document.getElementById('pagination-bottom').cloneNode();
+            document.getElementById('pagination-top').replaceWith(topClone);
+            document.getElementById('pagination-bottom').replaceWith(botClone);
+
+            var handler = $('#pagination-top,#pagination-bottom').bootpag({
+                total: Math.ceil(count / 50),
+                page: num,
+                maxVisible: 5,
+                leaps: false,
+                firstLastUse: true,
+                first: '←',
+                last: '→',
+                wrapClass: 'pagination'
+            }).on("page", function (event, num) {
+                search(num - 1);
+            });
+        }
+
+        //populate dropdown
+        $(document).ready(function () {
+            fetch(baseurl + '/api/college', {
+                method: 'GET'
+            }).then(response => response.text())
+                .then(data => {
+                    let option;
+                    let parseed_data = JSON.parse(data);
+                    for (let i = 0; i < parseed_data.length; i++) {
+                        option = document.createElement('option');
+                        option.text = parseed_data[i].name;
+                        option.value = parseed_data[i].collegeId;
+                        collegeDropDown.add(option)
+                    };
+                }).catch((error) => {
+                    console.log('ERROR: ', error);
+                }).then(() => {
+                    //if is prequery
+                    let params = (new URL(document.location)).searchParams;
+                    if (params.has('college')) {
+                        collegeDropDown.selectedIndex = params.get('college');
+                        $('#searchBtn').click();
+                    }
+                    if (params.has('name')) {
+                        $('#CourseInput')[0].value = params.get('name');
+                        $('#searchBtn').click();
+                    }
+                });
+        });
+
+        function departmentChain() {
+            departmentDropDown.options.length = 1;
+            let selected_val = collegeDropDown.value;
+            let option;
+            for (let i = 0; i < departmetCollegeData.length; i++) {
+                if (departmetCollegeData[i].collegeId == selected_val) {
+                    option = document.createElement('option');
+                    option.text = departmetCollegeData[i].dapartmentName;
+                    option.value = departmetCollegeData[i].departmentId;
+                    departmentDropDown.add(option);
+                }
+            }
+        };
+
+        function search(page = 0) {
+            let url = new URL(baseurl + '/api/course');
+            let urlPara = new URLSearchParams(new FormData(formelem));
+            urlPara.append("page", page);
+            url.search = urlPara;
+            fetch(url, {
+                method: 'GET',
+            }).then(response => response.text())
+                .then(data => {
+                    let parseed_data = JSON.parse(data);
+                    let total = parseed_data["total"];
+                    let dataarr = parseed_data["data"];
+                    let template = $.templates("#courseTemplate");
+                    let html = template.render(dataarr);
+                    $("#courseList").html(html);
+                    return total
+                }).catch((error) => {
+                    console.log('ERROR: ', error);
+                }).then(total => {
+                    setPagination(page + 1, total);
+                });
+        };
+
+        if (localStorage.getItem('token') != null) {
+            document.getElementById("signinButton").innerText = '已登入';
+            document.getElementById("signinButton").onclick = signout;
+        }
+
+        function signin() {
+            gapi.auth2.authorize({
+                client_id: '',
+                scope: 'email profile openid',
+                response_type: 'id_token',
+                prompt: 'consent',
+                cookie_policy: 'none',
+                hosted_domain: 'gemail.yuntech.edu.tw'
+            }, function (response) {
+                if (response.error) {
+                    return;
+                }
+
+                fetch(baseurl + '/api/auth/authcallback', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        Code: response.id_token
+                    })
+                }).then(response => response.text())
+                    .then(token => {
+                        console.log(token);
+                        localStorage.setItem('token', token);
+                        document.getElementById("signinButton").innerText = '已登入';
+                        document.getElementById("signinButton").onclick = signout;
+                    }).catch((error) => {
+                        console.log('ERROR: ', error);
+                    });
+            });
+        }
+
+        function signout() {
+            localStorage.removeItem('token');
+            location.reload();
+            // document.getElementById("signinButton").innerHTML = '<i class="fab fa-google"></i> Sign in with Google';
+            // document.getElementById("signinButton").onclick = signin;
+        }
+
+        // When the user scrolls down 20px from the top of the document, show the button
+        window.onscroll = function () { scrollFunction() };
+
+        function scrollFunction() {
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                totopbtn.style.display = "block";
+            } else {
+                totopbtn.style.display = "none";
+            }
+        }
+
+        // When the user clicks on the button, scroll to the top of the document
+        function topFunction() {
+            document.body.scrollTop = 0; // For Safari
+            document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+        }
+    </script>
+    <script src="https://apis.google.com/js/client:platform.js" async defer></script>
+    <script src="js/jquery.bootpag.min.js" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" async defer></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" async defer></script>
+</body>
+
+</html>
