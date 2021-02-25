@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="Google.Apis.Oauth2.v2" Version="1.42.0.1602" />
-    <PackageReference Include="HtmlSanitizer" Version="4.0.217" />
+    <PackageReference Include="HtmlSanitizer" Version="5.0.372" />
     <PackageReference Include="JWT.Extensions.AspNetCore" Version="6.0.0-alpha1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.0" />
